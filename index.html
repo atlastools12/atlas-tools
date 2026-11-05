@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ATLAS ხელსაწყოები</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a working instrument panel. Inputs left, live result right, checklist below. */
+:root {
+  color-scheme: dark;
+  --bg: #07080c; --panel: #10121a; --line: #292c38; --line2: #3b3f4d;
+  --fg: #f3f3f5; --muted: #a0a3b1; --accent: #ff4040; --on-accent: #16070a;
+  --good: #47d18c; --warn: #f2c14e; --bad: #ff5c5c;
+  --body: "Noto Sans Georgian", "DejaVu Sans", system-ui, sans-serif;
+  --num: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 48px; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 12px 32px; border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand svg { width: 52px; height: 52px; flex: none; }
+.brand b { font-family: var(--num); font-size: 26px; letter-spacing: .22em; }
+header p { margin: 0; color: var(--muted); max-width: 46ch; }
+h1, h2 { margin: 0; text-wrap: balance; line-height: 1.2; font-weight: 900; }
+h1 { font-size: clamp(30px, 6vw, 44px); }
+h2 { font-size: 22px; }
+.sec-head { display: grid; gap: 6px; margin-bottom: 20px; }
+.sec-head p { margin: 0; color: var(--muted); max-width: 62ch; }
+.calc { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 780px) { .calc { grid-template-columns: minmax(0, 1fr); } }
+.inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 460px) { .inputs { grid-template-columns: minmax(0, 1fr); } }
+.field { display: grid; gap: 5px; align-content: end; }
+.field label { font-size: 14px; color: var(--muted); line-height: 1.35; }
+.control { display: flex; align-items: center; border: 1px solid var(--line2); border-radius: 6px; background: var(--panel); }
+.control:focus-within { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 1px; }
+.control input { flex: 1; min-width: 0; width: 100%; background: transparent; border: 0; outline: 0; color: var(--fg); font-family: var(--num); font-size: 18px; padding: 11px 4px 11px 12px; font-variant-numeric: tabular-nums; }
+.control span { padding-right: 12px; color: var(--muted); font-size: 14px; }
+.result { background: var(--panel); border: 1px solid var(--line2); border-radius: 10px; padding: 22px; display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); }
+@media (max-width: 780px) { .result { position: static; } }
+.verdict { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.verdict i { width: 11px; height: 11px; border-radius: 50%; background: currentColor; }
+.big small { display: block; color: var(--muted); font-size: 14px; }
+.big strong { font-family: var(--num); font-size: clamp(36px, 7vw, 48px); line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.rows { margin: 0; display: grid; gap: 0; }
+.rows div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-top: 1px solid var(--line); }
+.rows dt { color: var(--muted); font-size: 14px; }
+.rows dd { margin: 0; font-family: var(--num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.note { margin: 0; font-size: 13.5px; color: var(--muted); }
+.hint { margin: 14px 0 0; font-size: 13.5px; color: var(--muted); }
+.progress { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; margin-bottom: 20px; }
+.bar { flex: 1 1 220px; height: 10px; background: var(--panel); border: 1px solid var(--line2); border-radius: 5px; overflow: hidden; }
+.bar b { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.count { font-family: var(--num); }
+button { font: inherit; font-size: 14px; color: var(--fg); background: transparent; border: 1px solid var(--line2); border-radius: 6px; padding: 8px 14px; min-height: 40px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 32px; }
+@media (max-width: 780px) { .groups { grid-template-columns: minmax(0, 1fr); } }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+legend { font-weight: 700; font-size: 17px; padding: 0 0 6px; }
+.item { display: flex; gap: 12px; align-items: flex-start; padding: 9px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.item input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.item input:checked + span { color: var(--muted); }
+footer { color: var(--muted); font-size: 13.5px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { .bar b { transition: none; } }
+</style>
+
+<style>body{margin:0}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">
+        <svg viewBox="0 0 200 200" role="img" aria-label="ATLAS"><circle cx="100" cy="100" r="88" fill="none" stroke="#f3f3f5" stroke-width="4"/><ellipse cx="100" cy="100" rx="42" ry="88" fill="none" stroke="#6c7080" stroke-width="2.5"/><path d="M12 100h176M28 52h144M28 148h144" stroke="#6c7080" stroke-width="2.5"/><path d="M28 112Q92 28 166 132" fill="none" stroke="#ff4040" stroke-width="9" stroke-linecap="round"/><circle cx="166" cy="132" r="10" fill="#ff4040"/></svg>
+        <b>ATLAS</b>
+      </div>
+      <h1>ჩამოტანამდე დათვალე</h1>
+    </div>
+    <p>ორი უფასო ხელსაწყო: მოგების კალკულატორი და ჩეკლისტი. გამოიყენე თითოეულ ნივთზე, სანამ ფულს გადაიხდი.</p>
+  </header>
+
+  <section aria-labelledby="calc-title">
+    <div class="sec-head">
+      <h2 id="calc-title">მოგების კალკულატორი</h2>
+      <p>ჩაწერე შენი ნივთის ციფრები. ახლა ჩანს მაგალითი, ის რეალური პროდუქტის მონაცემი არ არის.</p>
+    </div>
+    <form class="calc" id="calc" autocomplete="off">
+      <div>
+        <div class="inputs">
+          <div class="field"><label for="buy">ერთი ცალის ყიდვის ფასი</label><div class="control"><input id="buy" type="number" min="0" step="any" inputmode="decimal" value="12"><span>₾</span></div></div>
+          <div class="field"><label for="qty">რამდენ ცალს ყიდულობ</label><div class="control"><input id="qty" type="number" min="1" step="1" inputmode="numeric" value="100"><span>ცალი</span></div></div>
+          <div class="field"><label for="ship">ტრანსპორტირება მთელ შეკვეთაზე</label><div class="control"><input id="ship" type="number" min="0" step="any" inputmode="decimal" value="300"><span>₾</span></div></div>
+          <div class="field"><label for="tax">საბაჟო და გადასახადები მთელ შეკვეთაზე</label><div class="control"><input id="tax" type="number" min="0" step="any" inputmode="decimal" value="200"><span>₾</span></div></div>
+          <div class="field"><label for="pack">შეფუთვა და მიწოდება ერთ გაყიდვაზე</label><div class="control"><input id="pack" type="number" min="0" step="any" inputmode="decimal" value="3"><span>₾</span></div></div>
+          <div class="field"><label for="ads">რეკლამა ერთ გაყიდვაზე</label><div class="control"><input id="ads" type="number" min="0" step="any" inputmode="decimal" value="6"><span>₾</span></div></div>
+          <div class="field"><label for="def">წუნი ან დაკარგული ნივთები</label><div class="control"><input id="def" type="number" min="0" max="100" step="any" inputmode="decimal" value="3"><span>%</span></div></div>
+          <div class="field"><label for="price">გასაყიდი ფასი</label><div class="control"><input id="price" type="number" min="0" step="any" inputmode="decimal" value="35"><span>₾</span></div></div>
+        </div>
+        <p class="hint">საბაჟოსა და გადასახადების თანხა შენი კონკრეტული ნივთის მიხედვით გადაამოწმე. კალკულატორი მათ თვითონ არ ითვლის.</p>
+      </div>
+      <aside class="result" aria-live="polite">
+        <div class="verdict" id="verdict"><i></i><span></span></div>
+        <div class="big"><small>სავარაუდო მოგება მთელ შეკვეთაზე</small><strong id="profit">0 ₾</strong></div>
+        <dl class="rows">
+          <div><dt>მოგება ერთ გაყიდვაზე</dt><dd id="unit">0 ₾</dd></div>
+          <div><dt>მარჟა</dt><dd id="margin">0%</dd></div>
+          <div><dt>დაბანდებული თანხა</dt><dd id="invest">0 ₾</dd></div>
+          <div><dt>უკუგება დაბანდებაზე</dt><dd id="roi">0%</dd></div>
+          <div><dt>მინიმალური ფასი ზარალის გარეშე</dt><dd id="even">0 ₾</dd></div>
+        </dl>
+        <p class="note">ეს სავარაუდო გათვლაა და მოგებას არ იძლევა გარანტიას. მოგება იმაზეა დამოკიდებული, რეალურად რამდენს გაყიდი.</p>
+      </aside>
+    </form>
+  </section>
+
+  <section aria-labelledby="check-title">
+    <div class="sec-head">
+      <h2 id="check-title">ჩამოტანამდე ჩეკლისტი</h2>
+      <p>გაიარე ყველა პუნქტი. თუ მონიშნული ცოტაა, შეკვეთას ჯერ ნუ გააკეთებ ან დაიწყე მცირე რაოდენობით.</p>
+    </div>
+    <div class="progress">
+      <div class="bar" aria-hidden="true"><b id="bar"></b></div>
+      <span class="count" id="count">0 / 0</span>
+      <button type="button" id="clear">გასუფთავება</button>
+    </div>
+    <div class="groups" id="groups"></div>
+  </section>
+
+  <footer>ATLAS • EST. 2026. ჩეკლისტის მონიშვნები მხოლოდ შენს ბრაუზერში ინახება.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 0) => (Number.isFinite(n) ? n : 0).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
+const val = id => { const n = parseFloat($(id).value); return Number.isFinite(n) && n >= 0 ? n : 0; };
+
+function compute(v) {
+  const sold = v.qty * (1 - Math.min(v.def, 100) / 100);
+  const invest = v.qty * v.buy + v.ship + v.tax;
+  const sellCost = sold * (v.pack + v.ads);
+  const total = invest + sellCost;
+  const revenue = sold * v.price;
+  const profit = revenue - total;
+  return { sold, invest, profit,
+    unit: sold > 0 ? profit / sold : 0,
+    margin: revenue > 0 ? profit / revenue * 100 : 0,
+    roi: invest > 0 ? profit / invest * 100 : 0,
+    even: sold > 0 ? total / sold : 0 };
+}
+
+function update() {
+  const r = compute({ buy: val('buy'), qty: val('qty'), ship: val('ship'), tax: val('tax'), pack: val('pack'), ads: val('ads'), def: val('def'), price: val('price') });
+  $('profit').textContent = fmt(r.profit) + ' ₾';
+  $('unit').textContent = fmt(r.unit, 2) + ' ₾';
+  $('margin').textContent = fmt(r.margin, 1) + '%';
+  $('invest').textContent = fmt(r.invest) + ' ₾';
+  $('roi').textContent = fmt(r.roi, 1) + '%';
+  $('even').textContent = fmt(r.even, 2) + ' ₾';
+  const [text, color] = r.profit < 0 ? ['ამ ფასით ზარალია', 'var(--bad)']
+    : r.margin < 15 ? ['დაბალი მარჟა', 'var(--bad)']
+    : r.margin < 30 ? ['მისაღები მარჟა, გადაამოწმე ხარჯები', 'var(--warn)']
+    : ['ძლიერი მარჟა', 'var(--good)'];
+  const el = $('verdict'); el.style.color = color; el.querySelector('span').textContent = text;
+}
+$('calc').addEventListener('input', update);
+$('calc').addEventListener('submit', e => e.preventDefault());
+update();
+
+const GROUPS = [
+  ['მოთხოვნა', ['ხალხი ამ ნივთს უკვე ეძებს ან ყიდულობს', 'მოთხოვნა მთელი წლის განმავლობაშია და არა მხოლოდ ერთ სეზონზე', 'ვიცი, ვინ არის მყიდველი და რა პრობლემას უგვარებს ნივთი', 'ნივთი მარტივად აიხსნება მოკლე ვიდეოში']],
+  ['კონკურენცია', ['ვნახე, ვინ ყიდის მსგავს ნივთს საქართველოში და რა ფასად', 'შემიძლია გამოვირჩე ხარისხით, სერვისით ან შეთავაზებით', 'ბაზარზე ფასების ომი არ მიდის', 'გამყიდველების კომენტარებსა და შეფასებებში ხშირ პრობლემებს გადავხედე']],
+  ['ნივთი', ['ნივთი არ იმსხვრევა და გადაზიდვას უძლებს', 'ზომა და წონა ტრანსპორტირებას ზედმეტად არ აძვირებს', 'დაბრუნებისა და გამოცვლის რისკი დაბალია', 'ნიმუში თვითონ ვნახე ან სანდო შეფასებით გადავამოწმე', 'ნივთს არ სჭირდება სპეციალური ნებართვა ან ამას წინასწარ გადავამოწმებ']],
+  ['ფული', ['მოგების კალკულატორში ყველა ხარჯი დავთვალე', 'მარჟა რეკლამის შემდეგაც მრჩება', 'საბაჟო და გადასახადები კონკრეტულ ნივთზე გადავამოწმე', 'პირველი შეკვეთა ისეთია, რომ წაგების შემთხვევაშიც გავუძლებ']],
+  ['მომწოდებელი', ['მომწოდებელზე შეფასებებსა და ისტორიას გადავხედე', 'ფასი, ვადა და მიწოდების პირობები წერილობით შევათანხმე', 'ვიცი, რა ხდება წუნის ან დაგვიანების შემთხვევაში']],
+  ['გაყიდვა', ['ვიცი, სად გავყიდი პირველ ცალებს', 'გადავიღებ ან გავაკეთებ კარგ ფოტოს და ვიდეოს', 'მყიდველს გასაგებად ავუხსნი, რატომ ღირს ეს ფასი']],
+];
+const KEY = 'atlas-checklist-v1';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const box = $('groups');
+GROUPS.forEach(([name, items], g) => {
+  const fs = document.createElement('fieldset');
+  const lg = document.createElement('legend'); lg.textContent = name; fs.append(lg);
+  items.forEach((t, i) => {
+    const id = `c${g}-${i}`;
+    const lab = document.createElement('label'); lab.className = 'item';
+    const inp = document.createElement('input'); inp.type = 'checkbox'; inp.id = id; inp.checked = !!saved[id];
+    const sp = document.createElement('span'); sp.textContent = t;
+    lab.append(inp, sp); fs.append(lab);
+  });
+  box.append(fs);
+});
+function progress() {
+  const all = [...box.querySelectorAll('input')];
+  const on = all.filter(x => x.checked);
+  $('count').textContent = `${on.length} / ${all.length}`;
+  $('bar').style.width = (on.length / all.length * 100) + '%';
+  saved = Object.fromEntries(on.map(x => [x.id, 1]));
+  try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+}
+box.addEventListener('change', progress);
+$('clear').addEventListener('click', () => { box.querySelectorAll('input').forEach(x => { x.checked = false; }); progress(); });
+progress();
+</script>
+</body>
+</html>
